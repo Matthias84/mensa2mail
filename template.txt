@@ -1,0 +1,9 @@
+:fork-and-knife-with-plate: Menüs am {{ date }} {{ canteen.name }}
+{% for menu in menues %}
+* {{ menu.name }}
+{% endfor %}
+
+
+:egg: Guten Appetit! 👨🍳
+
+{{ canteen.address }} [OpenStreetMap](https://www.openstreetmap.org/?mlat={{ canteen.coordinates[0] }}&mlon={{ canteen.coordinates[1] }})
