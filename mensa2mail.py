@@ -15,7 +15,7 @@ def getData(mensaID, date):
     canteen = jsonCanteen.json()
     canteenDay = jsonCanteenDay.json()
     meals = jsonMeals.json()
-    return canteen, canteenDay['closed'], meals
+    return canteen, not canteenDay['closed'], meals
 
 d = datetime.datetime.today()
 date=d.strftime('%Y-%m-%d')
