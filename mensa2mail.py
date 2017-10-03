@@ -1,11 +1,21 @@
+"""
+Send mail listing meals from openmensa.org
+
+Usage: mensa2mail.py MENSAID [--date=<date>]
+
+-h --help    show this
+
+"""
+
 import os
 import datetime
+from docopt import docopt
+from dateutil import parser
 import requests
 from jinja2 import Template, Environment, FileSystemLoader
 
-mensaID = "372"
-
-headers = {'User-Agent': 'mensa2mail 0.1',}
+vers = 'mensa2mail 0.1'
+headers = {'User-Agent': vers,}
 mypath = os.path.dirname(os.path.abspath(__file__))
 
 def getData(mensaID, date):
@@ -17,13 +27,18 @@ def getData(mensaID, date):
     meals = jsonMeals.json()
     return canteen, not canteenDay['closed'], meals
 
-d = datetime.datetime.today()
-date=d.strftime('%Y-%m-%d')
+arguments = docopt(__doc__, version=vers)
+mensaID = arguments["MENSAID"].split("=")[1]
+if arguments["--date"]:
+    dt = parser.parse(arguments["--date"])
+else:
+    dt = datetime.datetime.today()
+date=dt.strftime('%Y-%m-%d')
 #date="2017-07-04"
 canteen, open, meals = getData(mensaID, date)
 if open :
-    date = d.strftime('%d.%m.')
+    date = dt.strftime('%d.%m.')
     env = Environment(loader=FileSystemLoader(mypath), trim_blocks=True)
     print(env.get_template('template.txt').render(date=date, canteen=canteen, menues=meals))
-#TODO: CLI
+
 #TODO: sendmail

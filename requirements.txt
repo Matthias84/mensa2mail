@@ -1,2 +1,4 @@
 requests
 jinja2
+docopt
+python-dateutil
