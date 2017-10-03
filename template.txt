@@ -1,9 +1,20 @@
 :fork-and-knife-with-plate: Menüs am {{ date }} {{ canteen.name }}
 {% for menu in menues %}
-* {{ menu.name }}
+{% if 'vegan' in menu.name %}
+* :carrot: {{ menu.name }} {{ menu.prices.students }}€ / {{ menu.prices.others }}€
+{% endif %}
 {% endfor %}
-
+{% for menu in menues %}
+{% if 'vegetarisch' in menu.name %}
+* :cheese: {{ menu.name }} {{ menu.prices.students }}€ / {{ menu.prices.others }}€
+{% endif %}
+{% endfor %}
+{% for menu in menues %}
+{% if not 'vegetarisch' in menu.name and not 'vegan' in menu.name %}
+* :meat_on_bone: {{ menu.name }} {{ menu.prices.students }}€ / {{ menu.prices.others }}€
+{% endif %}
+{% endfor %}
 
 :egg: Guten Appetit! 👨🍳
 
-{{ canteen.address }} [OpenStreetMap](https://www.openstreetmap.org/?mlat={{ canteen.coordinates[0] }}&mlon={{ canteen.coordinates[1] }})
+{{ canteen.address }} (https://www.openstreetmap.org/?mlat={{ canteen.coordinates[0] }}&mlon={{ canteen.coordinates[1] }})
