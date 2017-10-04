@@ -13,6 +13,7 @@ from docopt import docopt
 from dateutil import parser
 import requests
 from jinja2 import Template, Environment, FileSystemLoader
+import emoji
 
 vers = 'mensa2mail 0.1'
 headers = {'User-Agent': vers,}
@@ -39,6 +40,9 @@ canteen, open, meals = getData(mensaID, date)
 if open :
     date = dt.strftime('%d.%m.')
     env = Environment(loader=FileSystemLoader(mypath), trim_blocks=True)
-    print(env.get_template('template.txt').render(date=date, canteen=canteen, menues=meals))
+    txt = env.get_template('template.txt').render(date=date, canteen=canteen, menues=meals)
+    txt = emoji.emojize(txt, use_aliases=True)
+    print(txt)
 
 #TODO: sendmail
+#TODO: Fehlerfall API abfangen
