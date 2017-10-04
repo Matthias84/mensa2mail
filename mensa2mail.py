@@ -1,7 +1,7 @@
 """
 Send mail listing meals from openmensa.org
 
-Usage: mensa2mail.py MENSAID FROM TO SERVER USER PASSWORD [--date=<date>]
+Usage: mensa2mail.py MENSAID MENSAID2 FROM TO SERVER USER PASSWORD [--date=<date>]
 
 """
 
@@ -28,6 +28,21 @@ def getData(mensaID, date):
     meals = jsonMeals.json()
     return canteen, not canteenDay['closed'], meals
 
+def sendReport(arguments, canteen, meals):
+    date = dt.strftime('%d.%m.')
+    env = Environment(loader=FileSystemLoader(mypath), trim_blocks=True)
+    txt = env.get_template('template.txt').render(date=date, canteen=canteen, menues=meals)
+    txt = emoji.emojize(txt, use_aliases=True)
+    print(txt)
+    subject = txt.split('\n', 1)[0]
+    content = txt.split('\n', 1)[1]
+    mailFrom = arguments["FROM"]
+    mailTo = arguments["TO"]
+    user = arguments["USER"]
+    pw = arguments["PASSWORD"]
+    server = arguments["SERVER"]
+    sendEmail(content, subject, mailFrom, mailTo, server, user, pw)
+
 def sendEmail(content, subject, emailFrom, emailTo, server, username, password):
     msg = EmailMessage()
     msg.set_content(content)
@@ -51,20 +66,18 @@ else:
 date=dt.strftime('%Y-%m-%d')
 #date="2017-07-04"
 canteen, open, meals = getData(mensaID, date)
-if open :
-    date = dt.strftime('%d.%m.')
-    env = Environment(loader=FileSystemLoader(mypath), trim_blocks=True)
-    txt = env.get_template('template.txt').render(date=date, canteen=canteen, menues=meals)
-    txt = emoji.emojize(txt, use_aliases=True)
-    print(txt)
-    subject = txt.split('\n', 1)[0]
-    content = txt.split('\n', 1)[1]
-    mailFrom = arguments["FROM"]
-    mailTo = arguments["TO"]
-    user = arguments["USER"]
-    pw = arguments["PASSWORD"]
-    server = arguments["SERVER"]
-    sendEmail(content,subject,mailFrom, mailTo, server, user, pw)
+if open:
+    sendReport(arguments, canteen, meals)
+else:
+    # fallback mensa2
+    mensaID = arguments["MENSAID2"].split("=")[1]
+    canteen, open, meals = getData(mensaID, date)
+    if open:
+        sendReport(arguments, canteen, meals)
+    else:
+        print("All mensas closed!")
+
+
 
 #TODO: logging
 #TODO: Fehlerfall API abfangen
