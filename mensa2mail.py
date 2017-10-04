@@ -1,9 +1,7 @@
 """
 Send mail listing meals from openmensa.org
 
-Usage: mensa2mail.py MENSAID [--date=<date>]
-
--h --help    show this
+Usage: mensa2mail.py MENSAID FROM TO SERVER USER PASSWORD [--date=<date>]
 
 """
 
@@ -14,6 +12,8 @@ from dateutil import parser
 import requests
 from jinja2 import Template, Environment, FileSystemLoader
 import emoji
+import smtplib
+from email.message import EmailMessage
 
 vers = 'mensa2mail 0.1'
 headers = {'User-Agent': vers,}
@@ -27,6 +27,20 @@ def getData(mensaID, date):
     canteenDay = jsonCanteenDay.json()
     meals = jsonMeals.json()
     return canteen, not canteenDay['closed'], meals
+
+def sendEmail(content, subject, emailFrom, emailTo, server, username, password):
+    msg = EmailMessage()
+    msg.set_content(content)
+    msg["Subject"] = subject
+    msg["From"] = emailFrom
+    msg["To"] = emailTo
+    msg["X-Priority"] = '5'
+    conn = smtplib.SMTP(server, 587)
+    conn.ehlo()
+    conn.starttls()
+    conn.login(username, password)
+    conn.sendmail(emailFrom, emailTo, msg.as_string())
+    conn.close()
 
 arguments = docopt(__doc__, version=vers)
 mensaID = arguments["MENSAID"].split("=")[1]
@@ -43,6 +57,14 @@ if open :
     txt = env.get_template('template.txt').render(date=date, canteen=canteen, menues=meals)
     txt = emoji.emojize(txt, use_aliases=True)
     print(txt)
+    subject = txt.split('\n', 1)[0]
+    content = txt.split('\n', 1)[1]
+    mailFrom = arguments["FROM"]
+    mailTo = arguments["TO"]
+    user = arguments["USER"]
+    pw = arguments["PASSWORD"]
+    server = arguments["SERVER"]
+    sendEmail(content,subject,mailFrom, mailTo, server, user, pw)
 
-#TODO: sendmail
+#TODO: logging
 #TODO: Fehlerfall API abfangen

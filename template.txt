@@ -1,4 +1,4 @@
-:fork-and-knife-with-plate: Menüs am {{ date }} ({{ canteen.name }})
+:fork_and_knife: Menüs am {{ date }} ({{ canteen.name }})
 {% for menu in menues %}
 {% if 'vegan' in menu.name %}
 * :carrot: {{ menu.name }} {{ menu.prices.students }}€ / {{ menu.prices.others }}€
@@ -6,7 +6,7 @@
 {% endfor %}
 {% for menu in menues %}
 {% if 'vegetarisch' in menu.name %}
-* :cheese: {{ menu.name }} {{ menu.prices.students }}€ / {{ menu.prices.others }}€
+* :egg: {{ menu.name }} {{ menu.prices.students }}€ / {{ menu.prices.others }}€
 {% endif %}
 {% endfor %}
 {% for menu in menues %}
