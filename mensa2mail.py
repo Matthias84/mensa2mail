@@ -6,20 +6,23 @@ Usage: mensa2mail.py MENSAID MENSAID2 FROM TO SERVER USER PASSWORD [--date=<date
 """
 
 import os
+import sys
 import datetime
+import logging
+import smtplib
+from email.message import EmailMessage
 from docopt import docopt
 from dateutil import parser
 import requests
 from jinja2 import Template, Environment, FileSystemLoader
 import emoji
-import smtplib
-from email.message import EmailMessage
 
 vers = 'mensa2mail 0.1'
 headers = {'User-Agent': vers,}
 mypath = os.path.dirname(os.path.abspath(__file__))
 
 def getData(mensaID, date):
+    logging.debug("Fetch /api/v2/canteens/" + mensaID + "/ for " + date)
     jsonCanteen = requests.get("https://openmensa.org/api/v2/canteens/"+mensaID+"/", headers=headers)
     jsonCanteenDay = requests.get("https://openmensa.org/api/v2/canteens/"+mensaID+"/days/"+date, headers=headers)
     jsonMeals = requests.get("https://openmensa.org/api/v2/canteens/"+mensaID+"/days/"+date+"/meals", headers=headers)
@@ -57,6 +60,7 @@ def sendEmail(content, subject, emailFrom, emailTo, server, username, password):
     conn.sendmail(emailFrom, emailTo, msg.as_string())
     conn.close()
 
+logging.basicConfig(level=logging.INFO)
 arguments = docopt(__doc__, version=vers)
 mensaID = arguments["MENSAID"].split("=")[1]
 if arguments["--date"]:
@@ -65,19 +69,26 @@ else:
     dt = datetime.datetime.today()
 date=dt.strftime('%Y-%m-%d')
 #date="2017-07-04"
-canteen, open, meals = getData(mensaID, date)
+try:
+    # fetch mensa
+    canteen, open, meals = getData(mensaID, date)
+except (requests.HTTPError, TypeError) as err:
+    logging.error("Error fetching mensa "+mensaID)
+    logging.error(err)
+    open = False
 if open:
     sendReport(arguments, canteen, meals)
 else:
     # fallback mensa2
     mensaID = arguments["MENSAID2"].split("=")[1]
-    canteen, open, meals = getData(mensaID, date)
+    try:
+        canteen, open, meals = getData(mensaID, date)
+    except (requests.HTTPError, TypeError) as err:
+        logging.error("Error fetching mensa " + mensaID)
+        logging.error(err)
+        open = False
     if open:
         sendReport(arguments, canteen, meals)
     else:
-        print("All mensas closed!")
-
-
-
-#TODO: logging
-#TODO: Fehlerfall API abfangen
+        logging.error("All mensas closed!")
+        sys.exit(1)
