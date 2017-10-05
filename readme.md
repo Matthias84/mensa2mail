@@ -16,7 +16,7 @@ Sends mails like this example:
 
 Uses the json APIv2 of OpenMensa and is build upon Python3 and requests, jinja2 libs.
 
-#Usage
+# Usage
 
 * You might want to setup an Python3 virtual environment
 * Install dependencies: `pip install -r requirements.txt`
@@ -26,6 +26,6 @@ Uses the json APIv2 of OpenMensa and is build upon Python3 and requests, jinja2 
 * Customize `template.txt` for your needs, you can use all OpenMensa [API properties](openmensa.org/api/v2/canteens/)
 * Add a cronjob e.g. for every weekday 8am : `0 08 * * 1-5 python ...`
 
-#Mensa missing?
+# Mensa missing?
 
 If your mensa / canteen is still missed, you might want to [contribute](https://openmensa.org/contribute) to the project. Help by extending their [python scrapers](https://github.com/mswart/openmensa-parsers)!
