@@ -1,7 +1,8 @@
 """
 Send mail listing meals from openmensa.org
 
-Usage: mensa2mail.py MENSAID MENSAID2 FROM TO SERVER USER PASSWORD [--date=<date>]
+Usage:
+    mensa2mail.py --mensaid=MENSAID --mensaid2=MENSAID --emailfrom=EMAIL --emailto=EMAIL --smtpserver=SERVER --smtpuser=USERNAME --smtppass=PASSWORD [--date=<date>]
 
 """
 
@@ -39,11 +40,11 @@ def sendReport(arguments, canteen, meals):
     print(txt)
     subject = txt.split('\n', 1)[0]
     content = txt.split('\n', 1)[1]
-    mailFrom = arguments["FROM"]
-    mailTo = arguments["TO"]
-    user = arguments["USER"]
-    pw = arguments["PASSWORD"]
-    server = arguments["SERVER"]
+    mailFrom = arguments["--emailfrom"]
+    mailTo = arguments["--emailto"]
+    server = arguments["--smtpserver"]
+    user = arguments["--smtpuser"]
+    pw = arguments["--smtppass"]
     sendEmail(content, subject, mailFrom, mailTo, server, user, pw)
 
 def sendEmail(content, subject, emailFrom, emailTo, server, username, password):
@@ -62,13 +63,13 @@ def sendEmail(content, subject, emailFrom, emailTo, server, username, password):
 
 logging.basicConfig(level=logging.INFO)
 arguments = docopt(__doc__, version=vers)
-mensaID = arguments["MENSAID"].split("=")[1]
 if arguments["--date"]:
     dt = parser.parse(arguments["--date"])
 else:
     dt = datetime.datetime.today()
 date=dt.strftime('%Y-%m-%d')
 #date="2017-07-04"
+mensaID = arguments["--mensaid"]
 try:
     # fetch mensa
     canteen, open, meals = getData(mensaID, date)
@@ -80,7 +81,7 @@ if open:
     sendReport(arguments, canteen, meals)
 else:
     # fallback mensa2
-    mensaID = arguments["MENSAID2"].split("=")[1]
+    mensaID = arguments["--mensaid2"]
     try:
         canteen, open, meals = getData(mensaID, date)
     except (requests.HTTPError, TypeError) as err:
